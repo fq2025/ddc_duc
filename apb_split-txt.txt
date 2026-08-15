@@ -1,0 +1,67 @@
+entity apb_split is
+    generic (
+        CAL_CHL_NUM    : integer := 512; -- Number of calculation channels for apb_reg_module
+        CNT_WIDTH      : integer := 32;  -- Width for dbf_204b_rx_num / dbf_204b_tx_num
+        WEI_ADDR_WIDTH : integer := 12;  -- Address width for apb_weibram_wr
+        MPS_ADDR_WIDTH : integer := 12;  -- Address width for apb_mpsbram_wr
+        MPS_BRAM_WIDTH : integer := 160; -- Per-BRAM data width for apb_mpsbram_wr
+        MPS_BRAM_NUM   : integer := 8;    -- Number of MPS BRAMs
+        J204B_LANE_NUM  : integer := 32    -- Number of s512x32 output channels
+    );
+    port (
+        -----------------------------------------------------------------------
+        -- APB Slave Interface (from master)
+        -----------------------------------------------------------------------
+        pclk    : in  std_logic;
+        presetn : in  std_logic;
+        paddr   : in  std_logic_vector(31 downto 0);
+        psel    : in  std_logic;
+        penable : in  std_logic;
+        pwrite  : in  std_logic;
+        pwdata  : in  std_logic_vector(31 downto 0);
+        prdata  : out std_logic_vector(31 downto 0);
+        pready  : out std_logic;
+        pslverr : out std_logic;
+
+        -----------------------------------------------------------------------
+        -- apb_reg_module outputs (pass-through)
+        -----------------------------------------------------------------------
+        dbf_dir         : out std_logic;                        --1bit  : DBF的工作方向
+        wei_sw_flag     : out std_logic;                        --1bit  : 权重RAM切换
+        mps_sw_flag     : out std_logic;                        --1bit  : 映射表RAM切换
+        j204b_rx_seg_num: in  std_logic_vector(2 downto 0);	    --3bit  : 204B接收端RAM一共几段数据
+        j204b_rx_dat_num: in  std_logic_vector(9 downto 0);	    --10bit : 204B接收端RAM每段包含多少个子带数据
+        rx_seg_sel_id   : in  std_logic_vector(2 downto 0);	    --3bit  : 接收端哪一段数据有效
+        j204b_tx_seg_num: in  std_logic_vector(2 downto 0);	    --3bit  : 204B发送端RAM一共几段数据
+        j204b_tx_dat_num: in  std_logic_vector(9 downto 0);     --10bit : 204B发送端RAM每段包含多少个子带数据
+        tx_seg_sel_id   : in  std_logic_vector(2 downto 0);	    --3bit  : 发送端哪一段数据有效	
+		                                                        
+        s32x512_sel_code0 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码0
+        s32x512_sel_code1 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码1
+        s32x512_sel_code2 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码2
+        s32x512_sel_code3 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码3		
+        s32x512_sel_code4 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码4
+        s32x512_sel_code5 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码5
+        s32x512_sel_code6 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码6
+        s32x512_sel_code7 : out t_slv5_array(0 to 511);         --5x512bit ：s32x512矩阵选择码7			
+						                                        
+        s512x32_sel_code0 : out t_slv512_array(0 to 31);        --512x32bit ：s512x32矩阵选择码
+        tx_seg_vld    : out t_slv8_array(0 to 511);             --8x512bit  ：s512x32矩阵输入端哪一段数据有效
+        s4x3_sel_code : out std_logic_vector(5 downto 0);       --6bit      ：s4x3矩阵选择码
+        s3x4_sel_code : out std_logic_vector(11 downto 0);      --12bit     ：s3x4矩阵选择码
+        -----------------------------------------------------------------------
+        -- apb_weibram_wr outputs (pass-through)
+        -----------------------------------------------------------------------		
+        wei_bram_rct_wen   : out std_logic_vector(3 downto 0);  --权重RAM遥控按字节写使能
+        wei_bram_rct_addr  : out std_logic_vector(7 downto 0);  --权重RAM遥控写地址
+        wei_bram_rct_wdata : out std_logic_vector(31 downto 0); --权重RAM遥控写数据
+        wei_bram_rct_rdata : in  std_logic_vector(31 downto 0); --权重RAM遥控读数据
+        -----------------------------------------------------------------------
+        -- apb_mpsbram_wr outputs (pass-through)
+        -----------------------------------------------------------------------
+        mps_bram_rct_wen   : out std_logic_vector(159 downto 0); --映射表RAM遥控按字节写使能
+        mps_bram_rct_addr  : out std_logic_vector(9 downto 0);   --映射表RAM遥控写地址
+        mps_bram_rct_wdata : out std_logic_vector(1279 downto 0);--映射表RAM遥控写数据
+        mps_bram_rct_rdata : in  std_logic_vector(1279 downto 0);--映射表RAM遥控读数据
+    );512 * 20 /8
+end entity apb_split;
